@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KHAI BÁO CÔNG VIỆC</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#0b1220;
+  color:#000;
+}
+.container{
+  max-width:900px;
+  margin:30px auto;
+  background:#fff;
+  padding:25px;
+  border-radius:12px;
+}
+h1{
+  text-align:center;
+  font-size:24px;
+  margin-bottom:25px;
+}
+label{
+  font-weight:bold;
+}
+input[type=text], textarea{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  margin-bottom:20px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+.section{
+  margin-bottom:30px;
+}
+.box{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.choice{
+  padding:10px 14px;
+  border:1px solid #333;
+  border-radius:20px;
+  cursor:pointer;
+  background:#fff;
+}
+.choice.active{
+  background:#ffd400;
+}
+.subbox{
+  margin-top:15px;
+  padding:15px;
+  border-radius:10px;
+  background:#f4f4f4;
+}
+.hidden{
+  display:none;
+}
+.work-item{
+  margin-bottom:15px;
+}
+.submit-btn{
+  width:100%;
+  padding:14px;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+  background:#ffd400;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>KHAI BÁO CÔNG VIỆC</h1>
+
+<div class="section">
+  <label>Họ và tên:</label>
+  <input type="text" id="fullname" placeholder="Nhập họ và tên">
+</div>
+
+<div class="section">
+  <label>Hoạt động <span id="banName">[BẠN]</span> muốn khai báo</label>
+  <div class="box" id="activityBox"></div>
+</div>
+
+<div class="section hidden" id="workSection">
+  <label><span id="banName2">[BẠN]</span> đã làm những gì</label>
+  <div class="box" id="workBox"></div>
+</div>
+
+<div class="section hidden" id="proofSection">
+  <label>Minh chứng (link - mở quyền truy cập):</label>
+  <div id="proofBox"></div>
+</div>
+
+<div class="section hidden" id="assignSection">
+  <label>NHỮNG CÔNG VIỆC ĐƯỢC PHÂN CÔNG CHO <span id="banName3">[BẠN]</span> TRÊN SỔ PHÂN CÔNG HIỆN LÀ CỦA AI?</label>
+  <div id="assignBox"></div>
+</div>
+
+<button class="submit-btn" id="submitBtn">GỬI KHAI BÁO</button>
+
+</div>
+
+<script>
+const activities = [
+"95 năm rực cháy khát vọng tuổi trẻ",
+"Không gian học nhóm",
+"Tuổi trẻ Địa chất tự hào dưới cờ Đảng",
+"Chương trình “Hành trình thanh niên theo dấu chân về nguồn”",
+"Cuộc thi tên lửa nước",
+"Workshop làm hoa - vòng tay",
+"Kêu gọi hưởng ứng “Giờ trái đất”",
+"Những câu chuyện “Thời Hoa Lửa”",
+"Tổ chức hoạt động “Thử thách 7 ngày sống xanh”",
+"Chuyên đề kỹ năng “Vững vàng báo cáo - Tự tin lan tỏa tri thức”",
+"Chủ nhật xanh",
+"Tham gia tốt Hội thi “Sáng mãi tên người”, năm 2026",
+"Buổi gặp mặt “Tiếp lửa truyền thống – Nối tiếp hành trình Tuổi trẻ”",
+"Thanh niên tiên tiến làm theo lời Bác",
+"Tọa đàm ND-BMT",
+"Lớp cảm tình Đoàn",
+"Giao lưu cầu lông"
+];
+
+const works = [
+"BẢN KẾ HOẠCH","FORM","CANVA","BÀI TRUYỀN THÔNG",
+"DỰ TRÙ KINH PHÍ","CHỤP ẢNH","DỰNG VIDEO",
+"KỊCH BẢN","TT VẬN ĐỘNG","VIẾT MAIL",
+"BÁO CÁO TK","NỘI DUNG KHÁC"
+];
+
+let selectedActivities = [];
+let selectedWorks = [];
+
+const activityBox = document.getElementById("activityBox");
+activities.forEach(a=>{
+  const div=document.createElement("div");
+  div.className="choice";
+  div.innerText=a;
+  div.onclick=()=>{
+    div.classList.toggle("active");
+    if(div.classList.contains("active")){
+      selectedActivities.push(a);
+    }else{
+      selectedActivities=selectedActivities.filter(x=>x!==a);
+    }
+    document.getElementById("workSection").classList.toggle("hidden",selectedActivities.length===0);
+  };
+  activityBox.appendChild(div);
+});
+
+const workBox=document.getElementById("workBox");
+works.forEach(w=>{
+  const div=document.createElement("div");
+  div.className="choice";
+  div.innerText=w;
+  div.onclick=()=>{
+    div.classList.toggle("active");
+    if(div.classList.contains("active")){
+      selectedWorks.push(w);
+    }else{
+      selectedWorks=selectedWorks.filter(x=>x!==w);
+    }
+    renderProof();
+    renderAssign();
+  };
+  workBox.appendChild(div);
+});
+
+function renderProof(){
+  const box=document.getElementById("proofBox");
+  box.innerHTML="";
+  selectedWorks.forEach(w=>{
+    const d=document.createElement("div");
+    d.className="work-item";
+    if(w==="BÀI TRUYỀN THÔNG"||w==="VIẾT MAIL"){
+      d.innerHTML=`<label>${w} – Minh chứng:</label><textarea rows="4"></textarea>`;
+    }else{
+      d.innerHTML=`<label>${w} – Link:</label><input type="text">`;
+    }
+    box.appendChild(d);
+  });
+  document.getElementById("proofSection").classList.toggle("hidden",selectedWorks.length===0);
+}
+
+function renderAssign(){
+  const box=document.getElementById("assignBox");
+  box.innerHTML="";
+  selectedActivities.forEach(a=>{
+    works.filter(w=>!selectedWorks.includes(w)).forEach(w=>{
+      const d=document.createElement("div");
+      d.className="work-item";
+      d.innerHTML=`<b>${a}</b> — ${w} của <input type="text" style="width:200px">`;
+      box.appendChild(d);
+    });
+  });
+  document.getElementById("assignSection").classList.toggle("hidden",selectedActivities.length===0);
+}
+
+document.getElementById("fullname").oninput=function(){
+  const parts=this.value.trim().split(" ");
+  if(parts.length>=2){
+    const name=parts.slice(-2).join(" ");
+    document.querySelectorAll("#banName,#banName2,#banName3").forEach(e=>e.innerText=name);
+  }
+};
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzd-uOWI-OC8n4SN67_3ARXuH8JxFErzUPMNFNHUhGtL4DVJu7if_9aCc1vApS1cTRK/exec";
+
+document.getElementById("submitBtn").onclick = () => {
+  const fullname = document.getElementById("fullname").value.trim();
+  if (!fullname || selectedActivities.length === 0) {
+    alert("Vui lòng nhập họ tên và chọn hoạt động");
+    return;
+  }
+
+  // Minh chứng
+  const proofs = {};
+  document.querySelectorAll("#proofBox .work-item").forEach(item => {
+    const label = item.querySelector("label").innerText;
+    const value = item.querySelector("input, textarea").value;
+    proofs[label] = value;
+  });
+
+  // Công việc của người khác
+  const assigns = [];
+  document.querySelectorAll("#assignBox .work-item").forEach(item => {
+    assigns.push(item.innerText);
+  });
+
+  const payload = {
+    fullname,
+    activities: selectedActivities,
+    works: selectedWorks,
+    proofs,
+    assigns
+  };
+
+  fetch(SCRIPT_URL, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(payload)
+})
+
+  .then(res => res.json())
+  .then(() => {
+    alert("✅ Gửi thành công!");
+    location.reload();
+  })
+  .catch(err => {
+    alert("❌ Lỗi gửi dữ liệu");
+    console.error(err);
+  });
+};
+</script>
+
+</body>
+</html>
